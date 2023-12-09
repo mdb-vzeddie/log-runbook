@@ -11,6 +11,7 @@ const MainSheetView = ({ runDetails, fuelData }) => {
     const [openFuelDialog, setOpenFuelDialog] = useState(false);
     const [currentRowIndex, setCurrentRowIndex] = useState(null);
     const [selectedFuels, setSelectedFuels] = useState([]);
+    const [gridApi, setGridApi] = useState(null);
 
     const onGridReady = params => {
         setGridApi(params.api);
@@ -52,17 +53,31 @@ const MainSheetView = ({ runDetails, fuelData }) => {
 
     useEffect(() => {
         if (runDetails) {
-            const { distance, interval } = runDetails;
+            const { distance, interval, metric } = runDetails;
             const numberOfIntervals = distance / interval;
-            const rows = Array.from({ length: numberOfIntervals }, (_, index) => ({
-                interval: (index + 1) * interval,
+            const raceStartRow = [{
+                intervalKm: "Race Start",
+                intervalMiles: "Race Start",
                 fuel: '',
                 calories: 0,
                 fat: 0,
                 sodium: 0,
                 caffeine: 0
-            }));
-            setGridRowData(rows);
+            }]
+            const rows = Array.from({ length: numberOfIntervals }, (_, index) => {
+                const intervalDistance = (index + 1) * interval;
+                const row = {
+                    intervalKm: metric === 'km' ? intervalDistance.toFixed(2) : null,
+                    intervalMiles: metric === 'miles' ? (intervalDistance * 0.621371).toFixed(2) : null,
+                    fuel: '',
+                    calories: 0,
+                    fat: 0,
+                    sodium: 0,
+                    caffeine: 0
+                };
+                return row;
+            });
+        setGridRowData([...raceStartRow, ...rows]);
         }
     }, [runDetails]);
 
@@ -75,50 +90,88 @@ const MainSheetView = ({ runDetails, fuelData }) => {
         return 40; // Default row height
     };
 
-    const mainSheetColumnDefs = [
-        { 
-            headerName: "Interval", 
-            field: "interval",
-            editable: false
-        },
-        { 
-            headerName: "Fuel", 
-            field: "fuel", 
-            cellStyle: {'white-space': 'pre-wrap', 'line-height': '1.5'},
-            cellEditor: 'agSelectCellEditor',
-            cellEditorParams: {
-                values: fuelData.map(fuel => fuel.name)
+    const getColumnsBasedOnMetric = (metric) => {
+        const columnDef = [
+            {
+                headerName: "Interval (km)",
+                field: "intervalKm",
+                editable: false,
+                width: 125
             },
-            editable: true 
-        },
-        {
-            headerName: "Calories",
-            field: "calories",
-            editable: false
-        },
-        {
-            headerName: "Fat",
-            field: "fat",
-            editable: false
-        },
-        {
-            headerName: "Sodium",
-            field: "sodium",
-            editable: false
-        },
-        {
-            headerName: "Caffeine",
-            field: "caffeine",
-            editable: false
-        },
-    ];
+            {
+                headerName: "Interval (mi)",
+                field: "intervalMi",
+                editable: false,
+                width: 125
+            },
+        ]
+        if (metric === 'miles') {
+            columnDef.reverse()
+        }
+        const otherColumns = [
+            { 
+                headerName: "Fuel", 
+                field: "fuel", 
+                cellStyle: {'whiteSpace': 'pre-wrap', 'lineHeight': '1.5'},
+                cellEditor: 'agSelectCellEditor',
+                cellEditorParams: {
+                    values: fuelData.map(fuel => fuel.name)
+                },
+                editable: true,
+                width: 300
+            },
+            {
+                headerName: "Calories",
+                field: "calories",
+                editable: false,
+                width: 125
+            },
+            {
+                headerName: "Fat",
+                field: "fat",
+                editable: false,
+                width: 125
+            },
+            {
+                headerName: "Sodium",
+                field: "sodium",
+                editable: false,
+                width: 125
+            },
+            {
+                headerName: "Caffeine",
+                field: "caffeine",
+                editable: false,
+                width: 125
+            },
+            {
+                headerName: "Temp",
+                field: "temp",
+                editable: true,
+                width: 125
+            },
+            {
+                headerName: "Time",
+                field: "time",
+                editable: true,
+                width: 125
+            },
+            {
+                headerName: "Notes",
+                field: "notes",
+                editable: true,
+                width: 400
+            }
+        ];
+        return [...columnDef, ...otherColumns];
+    }
 
     return (
         <>
         <Typography variant="h3">{runDetails.runName}</Typography>
             <div className="ag-theme-alpine-dark" style={{ height: '50vh', width: '100%' }}>
                 <AgGridReact
-                    columnDefs={mainSheetColumnDefs}
+                    columnDefs={getColumnsBasedOnMetric(runDetails.metric)}
                     onGridReady={onGridReady}
                     rowData={gridRowData}
                     onCellClicked={handleCellClicked}

@@ -9,11 +9,11 @@ const FuelManagementView = ({ onFuelDataChange }) => {
     const [rowData, setRowData] = useState([]);
 
     const fuelColumnDefs = [
-        { headerName: "Name", field: "name", editable: true },
-        { headerName: "Calories", field: "calories", editable: true },
-        { headerName: "Fat", field: "fat", editable: true },
-        { headerName: "Sodium", field: "sodium", editable: true },
-        { headerName: "Caffeine", field: "caffeine", editable: true },
+        { headerName: "Name", field: "name", editable: true, width: 300 },
+        { headerName: "Calories", field: "calories", editable: true, width: 100 },
+        { headerName: "Fat", field: "fat", editable: true, width: 100 },
+        { headerName: "Sodium", field: "sodium", editable: true, width: 100 },
+        { headerName: "Caffeine", field: "caffeine", editable: true, width: 100 },
     ];
 
     const onGridReady = (params) => {
