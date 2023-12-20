@@ -5,8 +5,9 @@ import '@ag-grid-community/styles/ag-grid.css';
 import '@ag-grid-community/styles/ag-theme-alpine.css';
 import { Typography } from '@mui/material';
 import FuelSelectDialog from '../components/FuelSelectDialog';
+import nutrients from '../components/nutrients';
 
-const MainSheetView = ({ runDetails, fuelData }) => {
+const MainSheetView = ({ runDetails, fuelData, updateAppGridRowData }) => {
     const [gridRowData, setGridRowData] = useState([]);
     const [openFuelDialog, setOpenFuelDialog] = useState(false);
     const [currentRowIndex, setCurrentRowIndex] = useState(null);
@@ -20,7 +21,7 @@ const MainSheetView = ({ runDetails, fuelData }) => {
     const handleCellClicked = (params) => {
         if (params.colDef.field === 'fuel') {
             setCurrentRowIndex(params.rowIndex);
-            setSelectedFuels(params.data.fuel || []);
+            setSelectedFuels(params.data.fuelDetails || []);
             setOpenFuelDialog(true);
         }
     };
@@ -28,68 +29,66 @@ const MainSheetView = ({ runDetails, fuelData }) => {
     const handleCloseFuelDialog = () => {
         setOpenFuelDialog(false);
         const updatedRows = [...gridRowData];
+        const nutrientTotals = {};
+
+        // Initialize nutrient totals
+        nutrients.forEach(nutrient => {
+            nutrientTotals[nutrient] = selectedFuels.reduce((total, fuel) => {
+                return total + (fuel[nutrient] || 0) * (fuel.count || 1);
+            }, 0);
+        });
+
         updatedRows[currentRowIndex] = {
             ...updatedRows[currentRowIndex],
-            fuel: selectedFuels.map(fuel => fuel.name).join('\n'),
-            calories: selectedFuels.reduce((totalCalories, fuel) => {
-                const calories = fuel.calories;
-                return typeof calories === 'number' && !isNaN(calories) ? totalCalories + calories : totalCalories;
-            }, 0),
-            fat: selectedFuels.reduce((totalFat, fuel) => {
-                const fat = fuel.fat;
-                return typeof fat === 'number' && !isNaN(fat) ? totalFat + fat : totalFat;
-            }, 0),
-            sodium: selectedFuels.reduce((totalSodium, fuel) => {
-                const sodium = fuel.sodium;
-                return typeof sodium === 'number' && !isNaN(sodium) ? totalSodium + sodium : totalSodium;
-            }, 0),
-            caffeine: selectedFuels.reduce((totalCaffeine, fuel) => {
-                const caffeine = fuel.caffeine;
-                return typeof caffeine === 'number' && !isNaN(caffeine) ? totalCaffeine + caffeine : totalCaffeine;
-            }, 0),
+            fuel: selectedFuels.map(fuel => `${fuel.name} (x${fuel.count})`).join('\n'),
+            fuelDetails: selectedFuels,
+            ...nutrientTotals
         };
+
         setGridRowData(updatedRows);
+        updateAppGridRowData(updatedRows);
     };
 
     useEffect(() => {
-        if (runDetails) {
-            const { distance, interval, metric } = runDetails;
-            const numberOfIntervals = distance / interval;
-            const raceStartRow = [{
-                intervalKm: "Race Start",
-                intervalMiles: "Race Start",
+    if (runDetails) {
+        const { distance, interval, metric } = runDetails;
+        const numberOfIntervals = distance / interval;
+
+        // Function to create a row with default nutrient values
+        const createRow = (intervalDistance, index, customRow) => {
+            const kmValue = metric === 'km' ? intervalDistance.toFixed(2) : (intervalDistance * 1.60934).toFixed(2);
+            const milesValue = metric === 'miles' ? intervalDistance.toFixed(2) : (intervalDistance * 0.621371).toFixed(2);
+
+            return {
+                intervalKm: customRow ? customRow : kmValue,
+                intervalMi: customRow ? customRow: milesValue,
                 fuel: '',
-                calories: 0,
-                fat: 0,
-                sodium: 0,
-                caffeine: 0
-            }]
-            const rows = Array.from({ length: numberOfIntervals }, (_, index) => {
-                const intervalDistance = (index + 1) * interval;
-                const row = {
-                    intervalKm: metric === 'km' ? intervalDistance.toFixed(2) : null,
-                    intervalMiles: metric === 'miles' ? (intervalDistance * 0.621371).toFixed(2) : null,
-                    fuel: '',
-                    calories: 0,
-                    fat: 0,
-                    sodium: 0,
-                    caffeine: 0
-                };
-                return row;
-            });
-        setGridRowData([...raceStartRow, ...rows]);
-        }
-    }, [runDetails]);
+                fuelDetails: [],
+                ...Object.fromEntries(nutrients.map(nutrient => [nutrient, 0]))
+            };
+        };
+
+        const raceStartRow = [createRow(0, null, "Race Start")];
+        const rows = Array.from({ length: numberOfIntervals }, (_, index) => {
+            return createRow((index + 1) * interval, index);
+        });
+        const raceEndRow = [createRow(0, null, "Race End")];
+
+        setGridRowData([...raceStartRow, ...rows, ...raceEndRow]);
+    }
+}, [runDetails]);
+
+    console.log(gridRowData)
+
 
     const getRowHeight = (params) => {
         if (params.data && params.data.fuel) {
-            // Estimate row height based on the number of line breaks
             const lineBreaks = params.data.fuel.match(/\n/g) || [];
-            return 40 + (lineBreaks.length * 20); // Adjust these values as needed
+            return 40 + (lineBreaks.length * 20);
         }
-        return 40; // Default row height
-    };
-
+        return 40;
+    }
+ 
     const getColumnsBasedOnMetric = (metric) => {
         const columnDef = [
             {
@@ -108,7 +107,7 @@ const MainSheetView = ({ runDetails, fuelData }) => {
         if (metric === 'miles') {
             columnDef.reverse()
         }
-        const otherColumns = [
+        columnDef.push(
             { 
                 headerName: "Fuel", 
                 field: "fuel", 
@@ -119,31 +118,17 @@ const MainSheetView = ({ runDetails, fuelData }) => {
                 },
                 editable: true,
                 width: 300
-            },
+            }
+        )
+        nutrients.map(nutrient => columnDef.push(
             {
-                headerName: "Calories",
-                field: "calories",
+                headerName: nutrient.charAt(0).toUpperCase() + nutrient.slice(1),
+                field: nutrient,
                 editable: false,
                 width: 125
-            },
-            {
-                headerName: "Fat",
-                field: "fat",
-                editable: false,
-                width: 125
-            },
-            {
-                headerName: "Sodium",
-                field: "sodium",
-                editable: false,
-                width: 125
-            },
-            {
-                headerName: "Caffeine",
-                field: "caffeine",
-                editable: false,
-                width: 125
-            },
+            }
+        ))
+        const otherColumns = [
             {
                 headerName: "Temp",
                 field: "temp",
@@ -168,7 +153,7 @@ const MainSheetView = ({ runDetails, fuelData }) => {
 
     return (
         <>
-        <Typography variant="h3">{runDetails.runName}</Typography>
+            <Typography variant="h3">{runDetails.runName}</Typography>
             <div className="ag-theme-alpine-dark" style={{ height: '50vh', width: '100%' }}>
                 <AgGridReact
                     columnDefs={getColumnsBasedOnMetric(runDetails.metric)}
