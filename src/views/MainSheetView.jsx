@@ -7,12 +7,11 @@ import { Typography } from '@mui/material';
 import FuelSelectDialog from '../components/FuelSelectDialog';
 import nutrients from '../components/nutrients';
 
-const MainSheetView = ({ runDetails, fuelData, updateAppGridRowData }) => {
+const MainSheetView = ({ runDetails, fuelData, updateAppGridRowData, setGridApi }) => {
     const [gridRowData, setGridRowData] = useState([]);
     const [openFuelDialog, setOpenFuelDialog] = useState(false);
     const [currentRowIndex, setCurrentRowIndex] = useState(null);
     const [selectedFuels, setSelectedFuels] = useState([]);
-    const [gridApi, setGridApi] = useState(null);
 
     const onGridReady = params => {
         setGridApi(params.api);
