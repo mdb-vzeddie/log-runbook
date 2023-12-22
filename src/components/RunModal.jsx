@@ -23,6 +23,8 @@ const RunModal = ({ open, handleClose, onSubmit }) => {
         onSubmit({ runName, distance, metric, interval });
     };
 
+    const isDistanceMetric = metric === "km" || metric === "miles";
+
     return (
         <Modal
             open={open}
@@ -41,14 +43,6 @@ const RunModal = ({ open, handleClose, onSubmit }) => {
                     onChange={(e) => setRunName(e.target.value)}
                 />
                 <TextField
-                    label="Distance"
-                    fullWidth
-                    margin="normal"
-                    type="number"
-                    value={distance}
-                    onChange={(e) => setDistance(e.target.value)}
-                />
-                <TextField
                     label="Metric"
                     fullWidth
                     select
@@ -58,7 +52,19 @@ const RunModal = ({ open, handleClose, onSubmit }) => {
                 >
                     <MenuItem value="km">Kilometers</MenuItem>
                     <MenuItem value="miles">Miles</MenuItem>
+                    <MenuItem value="hours">Hours</MenuItem>
+                    <MenuItem value="minutes">Minutes</MenuItem>
                 </TextField>
+                { isDistanceMetric && (
+                <TextField
+                    label="Distance"
+                    fullWidth
+                    margin="normal"
+                    type="number"
+                    value={distance}
+                    onChange={(e) => setDistance(e.target.value)}
+                />
+                )}
                 <TextField
                     label="Interval"
                     fullWidth

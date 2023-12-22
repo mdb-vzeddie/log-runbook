@@ -11,8 +11,6 @@ const App = () => {
   const [runDetails, setRunDetails] = useState(null);
   const [fuelData, setFuelData] = useState([]);
   const [gridRowData, setGridRowData] = useState([]);
-  const [gridApi, setGridApi] = useState(null);
-
 
   const handleOpen = () => setModalOpen(true);
   const handleClose = () => setModalOpen(false);
@@ -33,20 +31,14 @@ const App = () => {
     setGridRowData(newData);
   };
 
-      const handleExport = () => {
-        if (gridApi) {
-            gridApi.exportDataAsCsv();
-        }
-    };
-
   return (
     <div>
       <RunModal open={modalOpen} onSubmit={handleModalSubmit} handleClose={handleClose} />
 
       {modalSubmitted && (
         <>
-          <MainSheetView runDetails={runDetails} fuelData={fuelData} updateAppGridRowData={updateAppGridRowData} setGridApi={setGridApi} />
-                    <Grid container spacing={2}>
+          <MainSheetView runDetails={runDetails} fuelData={fuelData} updateAppGridRowData={updateAppGridRowData} />
+          <Grid container spacing={2}>
             <Grid item xs={12} md={6}>
               <FuelManagementView onFuelDataChange={handleFuelDataChange} />
             </Grid>
@@ -54,9 +46,6 @@ const App = () => {
               <RaceSummary gridRowData={gridRowData} runDetails={runDetails} />
             </Grid>
           </Grid>
-                              <Button onClick={handleExport} variant="contained" color="primary">
-                        Export as CSV
-                    </Button>
         </>
       )}
     </div>

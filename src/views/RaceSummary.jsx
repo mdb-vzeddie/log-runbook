@@ -47,11 +47,11 @@ const RaceSummary = ({ gridRowData }) => {
 
     return (
         <Paper elevation={3} style={{ padding: '16px', margin: '16px' }}>
-            <Typography variant="h6">Nutritional Summary</Typography>
+            <Typography variant="h4">Nutritional Summary</Typography>
             {nutrients.map(nutrient => (
                 <div key={nutrient}>
                     <Divider sx={{m: 1}}/>
-                    <Typography>{`${nutrient.charAt(0).toUpperCase() + nutrient.slice(1)}`}</Typography>
+                    <Typography variant="h5">{`${nutrient.charAt(0).toUpperCase() + nutrient.slice(1)}`}</Typography>
                     <Typography>Min: {summary[nutrient].min}</Typography>
                     <Typography>Max: {summary[nutrient].max}</Typography>
                     <Typography>Avg: {summary[nutrient].avg.toFixed(2)}</Typography>

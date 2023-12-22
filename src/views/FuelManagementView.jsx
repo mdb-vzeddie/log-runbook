@@ -4,6 +4,7 @@ import '@ag-grid-community/styles/ag-grid.css';
 import '@ag-grid-community/styles/ag-theme-alpine.css';
 import { Typography, Button } from '@mui/material';
 import nutrients from '../components/nutrients';
+import Papa from 'papaparse';
 
 const FuelManagementView = ({ onFuelDataChange }) => {
     const [gridApi, setGridApi] = useState(null);
@@ -24,6 +25,13 @@ const FuelManagementView = ({ onFuelDataChange }) => {
         setGridApi(params.api);
     };
 
+    const exportFuelData = () => {
+        if (gridApi) {
+            gridApi.exportDataAsCsv();
+        }
+    };
+
+
     const addFuelItem = () => {
         // Initialize new item with default values for each nutrient
         const newItem = { name: '' };
@@ -43,9 +51,32 @@ const FuelManagementView = ({ onFuelDataChange }) => {
         }
     };
 
+    const handleFileUpload = (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            Papa.parse(file, {
+                header: true,
+                complete: (results) => {
+                    const parsedData = results.data.map(row => {
+                        let newRow = {};
+                        // Map CSV headers to field names
+                        newRow["name"] = row["Name"] || '';
+                        nutrients.forEach(nutrient => {
+                            const nutrientCapitalized = nutrient.charAt(0).toUpperCase() + nutrient.slice(1);
+                            newRow[nutrient] = parseFloat(row[nutrientCapitalized]) || 0;
+                        });
+                        return newRow;
+                    });
+                    setRowData(parsedData);
+                }
+            });
+        }
+    };
+
+
     return (
         <div className="ag-theme-alpine-dark" style={{ height: '50vh' }}>
-            <Typography variant="h5" sx={{m: 2}}>Fuel Management</Typography>
+            <Typography variant="h5" sx={{ m: 2 }}>Fuel Management</Typography>
             <AgGridReact
                 columnDefs={fuelColumnDefs}
                 onGridReady={onGridReady}
@@ -53,7 +84,20 @@ const FuelManagementView = ({ onFuelDataChange }) => {
                 rowData={rowData}
                 animateRows={true}
             />
-            <Button variant="contained" onClick={addFuelItem} sx={{mt: 2}}>Add Fuel Item</Button>
+            <Button variant="contained" onClick={addFuelItem} sx={{ mt: 2 }}>Add Fuel Item</Button>
+            <Button variant="contained" onClick={exportFuelData} sx={{ ml: 2, mt: 2 }}>Export Fuel Data</Button>
+            <input
+                type="file"
+                accept=".csv"
+                onChange={handleFileUpload}
+                style={{ display: 'none' }}
+                id="fuelManagementFileUpload"
+            />
+            <label htmlFor="fuelManagementFileUpload">
+                <Button variant="contained" component="span" sx={{ ml: 2, mt: 2 }}>
+                    Import Fuel Data
+                </Button>
+            </label>
         </div>
     );
 };
