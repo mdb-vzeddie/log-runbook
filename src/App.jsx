@@ -3,7 +3,7 @@ import RunModal from './components/RunModal';
 import MainSheetView from './views/MainSheetView';
 import FuelManagementView from './views/FuelManagementView';
 import RaceSummary from './views/RaceSummary';
-import { Grid, Button, Modal, Box, Typography } from '@mui/material';
+import { Grid, Button, Modal, Box, Typography, Paper } from '@mui/material';
 
 const App = () => {
   const [modalOpen, setModalOpen] = useState(false);
@@ -116,21 +116,37 @@ const App = () => {
               <RaceSummary gridRowData={gridRowData} runDetails={runDetails} />
             </Grid>
           </Grid>
+
+          {/* New Race Button */}
           <Button
             variant="contained"
             color="primary"
             onClick={() => setShowConfirmModal(true)}
-            style={{ position: 'fixed', bottom: 20, right: 20 }}>
+          >
             New Race
           </Button>
 
           {/* Confirmation Modal */}
           <Modal open={showConfirmModal} onClose={() => setShowConfirmModal(false)}>
-            <Box style={{ /* your styling for the modal box */ }}>
-              <Typography variant="h6">Start a New Race?</Typography>
-              <Typography>This will clear the current race data.</Typography>
-              <Button onClick={handleNewRace}>Confirm</Button>
-              <Button onClick={() => setShowConfirmModal(false)}>Cancel</Button>
+            <Box
+              style={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                outline: 'none'
+              }}
+            >
+              <Paper elevation={3} style={{ padding: '20px', borderRadius: '15px' }}>
+                <Typography variant="h6" style={{ marginBottom: '10px' }}>Start a New Race?</Typography>
+                <Typography style={{ marginBottom: '20px' }}>This will clear the current race data.</Typography>
+                <Button variant="contained" color="primary" onClick={handleNewRace} style={{ marginRight: '10px' }}>
+                  Confirm
+                </Button>
+                <Button variant="outlined" onClick={() => setShowConfirmModal(false)}>
+                  Cancel
+                </Button>
+              </Paper>
             </Box>
           </Modal>
         </>
