@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AgGridReact } from 'ag-grid-react';
 import '@ag-grid-community/styles/ag-grid.css';
 import '@ag-grid-community/styles/ag-theme-alpine.css';
@@ -12,13 +12,14 @@ const FuelManagementView = ({ onFuelDataChange }) => {
 
     // Dynamically generate column definitions
     const fuelColumnDefs = [
+        { headerName: '', field: 'checkboxBtn', checkboxSelection: true, headerCheckboxSelection: true, pinned: 'left', width: 50 },
         { headerName: "Name", field: "name", editable: true, width: 300 },
         ...nutrients.map(nutrient => ({
             headerName: nutrient.charAt(0).toUpperCase() + nutrient.slice(1),
             field: nutrient,
             editable: true,
             width: 100
-        }))
+        })),
     ];
 
     const onGridReady = (params) => {
@@ -30,6 +31,19 @@ const FuelManagementView = ({ onFuelDataChange }) => {
             gridApi.exportDataAsCsv();
         }
     };
+
+    // Load data from local storage when component mounts
+    useEffect(() => {
+        const savedRowData = localStorage.getItem('fuelData');
+        if (savedRowData) {
+            setRowData(JSON.parse(savedRowData));
+        }
+    }, []);
+
+    // Save rowData to local storage whenever it changes
+    useEffect(() => {
+        localStorage.setItem('fuelData', JSON.stringify(rowData));
+    }, [rowData]);
 
 
     const addFuelItem = () => {
@@ -73,7 +87,6 @@ const FuelManagementView = ({ onFuelDataChange }) => {
         }
     };
 
-
     return (
         <div className="ag-theme-alpine-dark" style={{ height: '50vh' }}>
             <Typography variant="h5" sx={{ m: 2 }}>Fuel Management</Typography>
@@ -83,8 +96,16 @@ const FuelManagementView = ({ onFuelDataChange }) => {
                 onCellValueChanged={onCellValueChanged}
                 rowData={rowData}
                 animateRows={true}
+                singleClickEdit
+                stopEditingWhenCellsLoseFocus
+                rowSelection='multiple'
             />
             <Button variant="contained" onClick={addFuelItem} sx={{ mt: 2 }}>Add Fuel Item</Button>
+            <Button variant="contained" onClick={_ => {
+                const selectedRows = gridApi.getSelectedRows();
+                gridApi.applyTransaction({ remove: selectedRows });
+            }}
+            sx={{ ml: 2, mt: 2 }}>Delete Selected Fuel</Button>
             <Button variant="contained" onClick={exportFuelData} sx={{ ml: 2, mt: 2 }}>Export Fuel Data</Button>
             <input
                 type="file"
