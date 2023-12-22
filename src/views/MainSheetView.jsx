@@ -7,8 +7,7 @@ import { Typography, Button } from '@mui/material';
 import FuelSelectDialog from '../components/FuelSelectDialog';
 import nutrients from '../components/nutrients';
 
-const MainSheetView = ({ runDetails, fuelData, updateAppGridRowData }) => {
-    const [gridRowData, setGridRowData] = useState([]);
+const MainSheetView = ({ runDetails, fuelData, gridRowData, setGridRowData }) => {
     const [openFuelDialog, setOpenFuelDialog] = useState(false);
     const [currentRowIndex, setCurrentRowIndex] = useState(null);
     const [selectedFuels, setSelectedFuels] = useState([]);
@@ -51,7 +50,7 @@ const MainSheetView = ({ runDetails, fuelData, updateAppGridRowData }) => {
     };
 
     useEffect(() => {
-        if (runDetails) {
+        if (runDetails && gridRowData.length === 0) {
             const { distance, interval, metric } = runDetails;
             const numberOfIntervals = distance / interval;
             const isDistanceMetric = metric === 'km' || metric === 'miles';
@@ -98,7 +97,7 @@ const MainSheetView = ({ runDetails, fuelData, updateAppGridRowData }) => {
                 setGridRowData([...raceStartRow, ...raceEndRow]);
             }
         }
-    }, [runDetails]);
+    }, [runDetails, gridRowData]);
 
     const getRowHeight = (params) => {
         if (params.data && params.data.fuel) {

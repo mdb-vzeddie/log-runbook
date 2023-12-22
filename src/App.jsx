@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import RunModal from './components/RunModal';
 import MainSheetView from './views/MainSheetView';
 import FuelManagementView from './views/FuelManagementView';
@@ -11,6 +11,8 @@ const App = () => {
   const [runDetails, setRunDetails] = useState(null);
   const [fuelData, setFuelData] = useState([]);
   const [gridRowData, setGridRowData] = useState([]);
+  const [isInitialLoadComplete, setIsInitialLoadComplete] = useState(false);
+
 
   const handleOpen = () => setModalOpen(true);
   const handleClose = () => setModalOpen(false);
@@ -31,16 +33,60 @@ const App = () => {
     setGridRowData(newData);
   };
 
+  useEffect(() => {
+    // Load gridRowData and fuelData from local storage
+    const savedGridRowData = localStorage.getItem('gridRowData');
+    const savedFuelData = localStorage.getItem('fuelData');
+    const savedRunDetails = localStorage.getItem('runDetails');
+
+    if (savedGridRowData) {
+      setGridRowData(JSON.parse(savedGridRowData));
+      setModalOpen(false);
+      setModalSubmitted(true);
+    }
+    if (savedFuelData) {
+      setFuelData(JSON.parse(savedFuelData));
+      setModalOpen(false);
+      setModalSubmitted(true);
+    }
+    if (savedRunDetails) {
+      setRunDetails(JSON.parse(savedRunDetails));
+      setModalOpen(false);
+      setModalSubmitted(true);
+    }
+
+    setIsInitialLoadComplete(true);
+
+  }, []);
+
+  useEffect(() => {
+    if (isInitialLoadComplete && gridRowData) {
+      localStorage.setItem('gridRowData', JSON.stringify(gridRowData));
+    }
+  }, [gridRowData, isInitialLoadComplete]);
+
+  useEffect(() => {
+    if (isInitialLoadComplete && fuelData) {
+      localStorage.setItem('fuelData', JSON.stringify(fuelData));
+    }
+  }, [fuelData, isInitialLoadComplete]);
+
+  useEffect(() => {
+    if (isInitialLoadComplete && runDetails) {
+      localStorage.setItem('runDetails', JSON.stringify(runDetails));
+    }
+  }, [runDetails, isInitialLoadComplete]);
+
   return (
     <div>
       <RunModal open={modalOpen} onSubmit={handleModalSubmit} handleClose={handleClose} />
 
       {modalSubmitted && (
         <>
-          <MainSheetView runDetails={runDetails} fuelData={fuelData} updateAppGridRowData={updateAppGridRowData} />
+          <MainSheetView runDetails={runDetails} fuelData={fuelData} gridRowData={gridRowData} setGridRowData={updateAppGridRowData} />
           <Grid container spacing={2}>
             <Grid item xs={12} md={6}>
-              <FuelManagementView onFuelDataChange={handleFuelDataChange} />
+              <FuelManagementView fuelData={fuelData} onFuelDataChange={handleFuelDataChange} />
             </Grid>
             <Grid item xs={12} md={6}>
               <RaceSummary gridRowData={gridRowData} runDetails={runDetails} />
