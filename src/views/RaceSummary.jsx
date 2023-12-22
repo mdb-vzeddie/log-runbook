@@ -52,8 +52,8 @@ const RaceSummary = ({ gridRowData }) => {
                 <div key={nutrient}>
                     <Divider sx={{m: 1}}/>
                     <Typography variant="h5">{`${nutrient.charAt(0).toUpperCase() + nutrient.slice(1)}`}</Typography>
-                    <Typography>Min: {summary[nutrient].min}</Typography>
-                    <Typography>Max: {summary[nutrient].max}</Typography>
+                    <Typography>Min: {summary[nutrient].min === Infinity ? "N/A" : summary[nutrient].min}</Typography>
+                    <Typography>Max: {summary[nutrient].max === -Infinity ? "N/A" : summary[nutrient].max}</Typography>
                     <Typography>Avg: {summary[nutrient].avg.toFixed(2)}</Typography>
                     <Typography>Total: {summary[nutrient].total}</Typography>
                 </div>

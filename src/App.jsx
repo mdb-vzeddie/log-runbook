@@ -3,15 +3,16 @@ import RunModal from './components/RunModal';
 import MainSheetView from './views/MainSheetView';
 import FuelManagementView from './views/FuelManagementView';
 import RaceSummary from './views/RaceSummary';
-import { Grid, Button } from '@mui/material';
+import { Grid, Button, Modal, Box, Typography } from '@mui/material';
 
 const App = () => {
-  const [modalOpen, setModalOpen] = useState(true);
+  const [modalOpen, setModalOpen] = useState(false);
   const [modalSubmitted, setModalSubmitted] = useState(false);
   const [runDetails, setRunDetails] = useState(null);
   const [fuelData, setFuelData] = useState([]);
   const [gridRowData, setGridRowData] = useState([]);
   const [isInitialLoadComplete, setIsInitialLoadComplete] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
 
 
   const handleOpen = () => setModalOpen(true);
@@ -32,6 +33,29 @@ const App = () => {
   const updateAppGridRowData = (newData) => {
     setGridRowData(newData);
   };
+
+  const handleNewRace = () => {
+    // Clear local storage
+    localStorage.clear();
+
+    // Reset state
+    setRunDetails(null);
+    setFuelData([]);
+    setGridRowData([]);
+    setModalSubmitted(false);
+
+    // Open the run details modal
+    setModalOpen(true);
+
+    // Close the confirmation modal
+    setShowConfirmModal(false);
+  };
+
+  useEffect(() => {
+    if (isInitialLoadComplete && !modalSubmitted) {
+      handleOpen();
+    }
+  }, [isInitialLoadComplete, modalSubmitted])
 
   useEffect(() => {
     // Load gridRowData and fuelData from local storage
@@ -92,8 +116,26 @@ const App = () => {
               <RaceSummary gridRowData={gridRowData} runDetails={runDetails} />
             </Grid>
           </Grid>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => setShowConfirmModal(true)}
+            style={{ position: 'fixed', bottom: 20, right: 20 }}>
+            New Race
+          </Button>
+
+          {/* Confirmation Modal */}
+          <Modal open={showConfirmModal} onClose={() => setShowConfirmModal(false)}>
+            <Box style={{ /* your styling for the modal box */ }}>
+              <Typography variant="h6">Start a New Race?</Typography>
+              <Typography>This will clear the current race data.</Typography>
+              <Button onClick={handleNewRace}>Confirm</Button>
+              <Button onClick={() => setShowConfirmModal(false)}>Cancel</Button>
+            </Box>
+          </Modal>
         </>
       )}
+
     </div>
   );
 };
