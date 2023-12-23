@@ -33,7 +33,7 @@ const RunModal = ({ open, handleClose, onSubmit }) => {
         >
             <Box sx={style}>
                 <Typography id="run-modal-title" variant="h6" component="h2" color="primary">
-                    Welcome to the run logbook!
+                    Welcome to the Run Logbook!
                 </Typography>
                 <TextField
                     label="Run Name"
