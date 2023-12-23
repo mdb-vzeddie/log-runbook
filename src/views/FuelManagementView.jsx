@@ -47,8 +47,7 @@ const FuelManagementView = ({ onFuelDataChange }) => {
 
 
     const addFuelItem = () => {
-        console.log(rowData);
-        if (rowData.length >= 1 && rowData[rowData.length - 1].name !== '') {
+        if (rowData.length === 0 || rowData[rowData.length - 1].name !== '') {
             // Initialize new item with default values for each nutrient
             const newItem = { name: '' };
             nutrients.forEach(nutrient => {
