@@ -108,7 +108,7 @@ const App = () => {
       {modalSubmitted && (
         <>
           <MainSheetView runDetails={runDetails} fuelData={fuelData} gridRowData={gridRowData} setGridRowData={updateAppGridRowData} />
-          <Grid container spacing={2}>
+         <Grid container spacing={2}>
             <Grid item xs={12} md={6}>
               <FuelManagementView fuelData={fuelData} onFuelDataChange={handleFuelDataChange} />
             </Grid>

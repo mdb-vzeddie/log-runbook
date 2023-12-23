@@ -87,6 +87,16 @@ const FuelManagementView = ({ onFuelDataChange }) => {
         }
     };
 
+    const handleDeleteSelected = () => {
+        const selectedRows = gridApi.getSelectedRows();
+        gridApi.applyTransaction({ remove: selectedRows });
+
+        // Update rowData state after deletion
+        const updatedRowData = rowData.filter(row => !selectedRows.includes(row));
+        setRowData(updatedRowData);
+        onFuelDataChange(updatedRowData); // Update parent component if needed
+    };
+
     return (
         <div className="ag-theme-alpine-dark" style={{ height: '50vh' }}>
             <Typography variant="h5" sx={{ m: 2 }}>Fuel Management</Typography>
@@ -101,11 +111,8 @@ const FuelManagementView = ({ onFuelDataChange }) => {
                 rowSelection='multiple'
             />
             <Button variant="contained" onClick={addFuelItem} sx={{ mt: 2 }}>Add Fuel Item</Button>
-            <Button variant="contained" onClick={_ => {
-                const selectedRows = gridApi.getSelectedRows();
-                gridApi.applyTransaction({ remove: selectedRows });
-            }}
-            sx={{ ml: 2, mt: 2 }}>Delete Selected Fuel</Button>
+            <Button variant="contained" onClick={handleDeleteSelected}
+                sx={{ ml: 2, mt: 2 }}>Delete Selected Fuel</Button>
             <Button variant="contained" onClick={exportFuelData} sx={{ ml: 2, mt: 2 }}>Export Fuel Data</Button>
             <input
                 type="file"
