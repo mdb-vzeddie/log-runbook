@@ -1,3 +1,3 @@
 // nutrients.jsx
-const nutrients = ['calories', 'carbohydrates', 'protein', 'fiber', 'fat', 'sodium', 'caffeine', 'liquids (L)'];
+const nutrients = ['calories', 'carbohydrates', 'protein', 'fiber', 'sugar', 'fat', 'sodium', 'caffeine', 'liquids (L)'];
 export default nutrients;
