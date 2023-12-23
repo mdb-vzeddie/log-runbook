@@ -238,7 +238,7 @@ const MainSheetView = ({ runDetails, fuelData, gridRowData, setGridRowData }) =>
     return (
         <>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Typography variant="h3">{runDetails.runName} ({
+                <Typography variant="h3" sx={{ mb: 1 }}>{runDetails.runName} ({
                     runDetails.metric === "km" ? `${runDetails.distance} KM` :
                         runDetails.metric === "miles" ? `${runDetails.distance} Mi` :
                             runDetails.metric === "hours" || runDetails.metric === "minutes" ? `${runDetails.interval} ${runDetails.metric.slice(0, -1)} intervals` : ''})</Typography>
